@@ -1,7 +1,7 @@
 /**
  * DSH Work Window —— 浏览器（Client）半区最小可运行骨架
  * ============================================================================
- * 证据与说明见 D:\program\dsh\docs\client-api.md（本文件所有 API 都有 file:line 出处）。
+ * 证据与说明见 <workspace>\docs\client-api.md（本文件所有 API 都有 file:line 出处）。
  *
  * 用法：
  *   1. 复制到插件包目录 `plugins/work-window/client.js`；

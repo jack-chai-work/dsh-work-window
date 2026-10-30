@@ -35,14 +35,15 @@
 
 ## 安装
 
-本插件已安装进当前 `desktop` profile（Junction 链接到本目录，随 HMR 热加载，无需重启）。
+本插件是标准 DSH bundle：安装进任意 profile 后随 HMR 热加载，无需重启。
 安装/验证/回滚的完整记录见 [`docs/VERIFICATION.md`](../../docs/VERIFICATION.md)。
+路径占位符（`<plugin-dir>` / `<DSH-install-dir>` / `$DSH_HOME`）含义见仓库根 README。
 
 官方安装方式（任意 profile）：
 
 ```powershell
 # 或使用 GUI：左侧栏「插件」→ 添加插件 → 填本目录绝对路径 → 安装 → 立即启用
-& "D:\software\DeepSeek Harness\resources\runtime\cli\bin\dsh.cmd" plugin --profile <name> add "D:\program\dsh\plugins\work-window"
+& "<DSH-install-dir>\resources\runtime\cli\bin\dsh.cmd" plugin --profile <name> add "<plugin-dir>"
 ```
 
 ## 配置（`cordis.patch.yml`）
@@ -59,7 +60,7 @@
     cacheTtlHours: 12
     confirmDuringPause: true
     confirmTimeoutMs: 600000      # 暂停时段确认弹窗最长等待时间，超时任务回队
-    cacheDir: C:\Users\you\.dsh\cache\work-window   # 可选，默认 $DSH_HOME/cache/work-window
+    cacheDir: C:\somewhere\work-window   # 可选；注释掉则用默认 $DSH_HOME/cache/work-window
     wakeNotice: '（工作时段已开始，暂停结束：继续执行队列中暂停的任务。）'
     policyText: null              # 可选：覆盖注入系统提示词的策略文本
 ```
@@ -76,7 +77,7 @@
 ## 开发
 
 ```powershell
-cd D:\program\dsh\plugins\work-window
+cd <plugin-dir>
 node tools/build-client.mjs      # 由 client.template.js + shared/status-client.mjs 生成 client.js
 node tools/parity.test.mjs      # 浏览器/Host 判定一致性（953 断言）
 node tools/host.test.mjs        # Host 门禁单测（32 断言，含 goal 挂起/回队/唤醒）

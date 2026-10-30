@@ -1,8 +1,12 @@
 # DSH 工作时段插件（Work Window）
 
+中文 | [English](README.en.md)
+
 一个 DeepSeek Harness（DSH）桌面端插件：让 agent **只在允许的工作时段发起模型请求**；暂停时段自动停止（不消耗 token），此时用户下发任务会**先提醒并请求确认**；法定节假日数据取自 [timor.tech](https://timor.tech/api/holiday) 并缓存在本地。左侧栏提供「工作时段」入口与状态面板。
 
-> 当前状态：已安装进本机 `desktop` profile 并通过 HMR 热加载生效（未重启应用）。安装/验证证据见 [docs/VERIFICATION.md](docs/VERIFICATION.md)。
+> 状态：可在 DSH `desktop` profile 热加载运行（已在 Windows + DSH `0.2.1-rc.5` 上实测安装，无需重启应用）。安装/验证结果见 [docs/VERIFICATION.md](docs/VERIFICATION.md)。
+
+**路径占位符**（下文命令中）：`<workspace>` 仓库根目录 · `<plugin-dir>`=`<workspace>/plugins/work-window` · `<DSH-install-dir>` DSH 安装目录 · `$DSH_HOME` DSH 配置目录（PowerShell 中写作 `$env:DSH_HOME`，通常为 `%USERPROFILE%\.dsh`）。
 
 ## 行为规则
 
@@ -51,45 +55,46 @@
 │   ├── host-api.md               Host 侧 API 调研（agent/pre-step、approval、systemPrompt、Config…）
 │   ├── client-api.md             Client 侧 API 调研（sidebar.panellist、main slot、locale、Host↔Client）
 │   ├── install-plan.md           安装与热加载方案（含实测记录、验证手段、风险）
-│   └── VERIFICATION.md           本次安装与验证记录（含回滚命令）
+│   └── VERIFICATION.md           安装与验证示例记录（含回滚命令）
 ├── prototype/                    Client 半区最小可运行骨架（调研产物）
 ├── tools/
 │   ├── check.mjs                 一键构建 + 全部测试 + 语法检查
 │   └── extract-asar.mjs          从 DSH 安装包 app.asar 中解包/读取文件的工具
 ├── BRIEF.md                      项目初始简报（环境事实、目标、协作约定）
-└── .gitignore                    忽略 .scratch/（asar 解包产物）与依赖缓存
+├── README.en.md                  English README
+├── LICENSE                       MIT
+├── .gitignore / .gitattributes   忽略 .scratch/ 与依赖缓存；统一 LF 换行
 ```
 
 ## 快速开始
 
-### 已经安装（本机 desktop profile）
+**环境要求**：DSH 桌面端（Windows/macOS/Linux，`desktop` profile，测试版本 `0.2.1-rc.5`）；仅开发/测试时需要 Node.js 24+。
 
-验证方式：
+### 安装
 
-1. 左侧栏应出现 **「工作时段」** 入口（时钟 + 暂停条图标，`order: 20`），点开可见状态面板；
-2. 工作日 09:00-12:00 / 14:00-18:00 显示 **暂停中**，输入框上方出现提醒条；其余时间显示 **可工作**；
-3. 运行时证据：`curl -s -N --max-time 4 http://127.0.0.1:49729/plugins/events` 的插件图中包含 `@local/dsh-work-window`；
-4. 节假日本地缓存：`C:\Users\chai_\.dsh\cache\work-window\holidays-2026.json`。
-
-若侧栏未出现：先 **F5** 刷新页面（只刷新浏览器，不重启应用）。
-
-### 安装到任意 profile
-
-GUI（推荐，自动写 profile 并热加载）：左侧栏「插件」→「添加插件」→ 填本目录绝对路径
-`D:\program\dsh\plugins\work-window` →「安装」→「立即启用」。
+GUI（推荐，自动写 profile 并热加载）：DSH 左侧栏「插件」→「添加插件」→ 填 **`<plugin-dir>` 的绝对路径** →「安装」→ 完成后点「立即启用」。
 
 CLI（需要先完全退出桌面应用）：
 
 ```powershell
-& "D:\software\DeepSeek Harness\resources\runtime\cli\bin\dsh.cmd" plugin --profile <name> add "D:\program\dsh\plugins\work-window"
+& "<DSH-install-dir>\resources\runtime\cli\bin\dsh.cmd" plugin --profile <profile> add "<plugin-dir>"
 ```
 
-> 详细步骤、手工安装（Junction + 原子写 `package.json`）与验证方法见 [docs/install-plan.md](docs/install-plan.md)、[docs/VERIFICATION.md](docs/VERIFICATION.md)。
+也可以手工复刻安装器产生的文件结果（Junction + 原子写 profile `package.json`），步骤见 [docs/install-plan.md](docs/install-plan.md)。
+
+### 安装后的验证
+
+1. 左侧栏出现 **「工作时段」** 入口（时钟 + 暂停条图标，`order: 20`），点开可见状态面板；
+2. 工作日 09:00-12:00 / 14:00-18:00 显示 **暂停中**，输入框上方出现提醒条；其余时间显示 **可工作**；
+3. 运行时证据：`GET http://127.0.0.1:<GUI 端口>/plugins/events` 的插件图中包含 `@local/dsh-work-window`；
+4. 节假日本地缓存：`$DSH_HOME\cache\work-window\holidays-<year>.json`。
+
+若侧栏未出现：先 **F5** 刷新页面（只刷新浏览器，不重启应用）。
 
 ### 卸载 / 回滚
 
 - 停用：从 profile `package.json` 的 `dsh.profile.bundles` 删除 `@local/dsh-work-window`（等 2-4 秒 HMR 热重组）；
-- 完整卸载：同时删除 `dependencies["@local/dsh-work-window"]` 与 `node_modules/@local/dsh-work-window` 链接；缓存目录 `$DSH_HOME/cache/work-window` 可选删除。
+- 完整卸载：同时删除 `dependencies["@local/dsh-work-window"]` 与 `node_modules/@local/dsh-work-window` 链接；缓存目录 `$DSH_HOME/cache/work-window` 可选删除；
 - 插件以 Junction 链接到本仓库目录，**移动/删除本目录会让插件失效**。
 
 ## 配置
@@ -108,7 +113,7 @@ CLI（需要先完全退出桌面应用）：
     cacheTtlHours: 12
     confirmDuringPause: true
     confirmTimeoutMs: 600000        # 暂停时段确认弹窗最长等待，超时任务回队
-    cacheDir: C:\Users\you\.dsh\cache\work-window   # 可选，默认 $DSH_HOME/cache/work-window
+    # cacheDir: 'D:\somewhere\work-window'   # 可选；默认 $DSH_HOME/cache/work-window
     wakeNotice: '（工作时段已开始，暂停结束：继续执行队列中暂停的任务。）'
     policyText: null                # 可选：覆盖注入系统提示词的策略文本
 ```
@@ -121,12 +126,12 @@ CLI（需要先完全退出桌面应用）：
 - `holiday: true` = 法定假日（休息）；`holiday: false` = 调休补班（算工作日）；普通周末由本地日历计算。
 - Host 缓存：`$DSH_HOME/cache/work-window/holidays-<year>.json`（原子写盘，TTL 默认 12h，6h 检查一次，11-12 月预取次年）。
 - Client 缓存：`localStorage['dsh-work-window:holidays:<year>']`；失败时使用 `shared/offline-holidays.json` 内置快照。
-- timor.tech 有速率限制（短时间连续请求会 429），Host 串行刷新并依赖缓存；本机 `web_fetch` 工具因 DNS fake-IP 被 SSRF 策略拒绝，Node/Host 原生 fetch 正常。
+- timor.tech 有速率限制（短时间连续请求会 429），Host 串行刷新并依赖缓存。
 
 ## 开发与测试
 
 ```powershell
-cd D:\program\dsh
+cd <workspace>
 node tools/check.mjs                      # 一键：构建 client.js + 全部测试 + 语法检查
 
 # 或单独运行
@@ -140,9 +145,9 @@ node plugins/work-window/tools/make-offline.mjs   # 重新生成离线节假日�
 
 改动约定：
 
-- 改浏览器逻辑 → 编辑 `plugins/work-window/client.template.js` 与/或 `shared/status-client.mjs`，然后 `node tools/build-client.mjs`；
+- 改浏览器逻辑 → 编辑 `plugins/work-window/client.template.js` 与/或 `shared/status-client.mjs`，然后 `node tools/build-client.mjs`（构建是确定性的，可安全提交产物）；
 - 客户端产物不能 `import` 任何 Harness 客户端包，只 `require('react')`；
-- 不要提交 `.scratch/`（asar 解包产物，可由 `node tools/extract-asar.mjs` 复现：`$env:ASAR_OUT='.scratch\asar'; node tools/extract-asar.mjs '<asar路径>' extract 'dsh/node_modules/@deepseek-ai/<包名>'`）。
+- 不要提交 `.scratch/`（asar 解包产物，可由 `node tools/extract-asar.mjs` 复现：`$env:ASAR_OUT='.scratch\asar'; node tools/extract-asar.mjs '<asar 路径>' extract 'dsh/node_modules/@deepseek-ai/<包名>'`）。
 
 ## 已知限制与未验证项
 
@@ -150,7 +155,7 @@ node plugins/work-window/tools/make-offline.mjs   # 重新生成离线节假日�
 - **子 agent 也受限**：subagent/teammate 的 turn 在暂停时段被拦，其父 turn 在等待子结果期间一并暂停。
 - **goal 挂起**会占用该 agent 直到时段结束，同会话其它任务排队等待（避免 goal 被 block 的权衡）。
 - **无在线 Web 客户端**时不弹确认，任务直接排队（避免审批永久 pending）。
-- **未在真实 GUI 模拟**：暂停时段注入用户消息并点击审批、以及面板明暗主题/视觉，需要人工确认；单测与安装证据见 [docs/VERIFICATION.md](docs/VERIFICATION.md)。
+- **GUI 交互未自动模拟**：暂停时段注入用户消息并点击审批、以及面板明暗主题/视觉，需要人工确认；单测与安装证据见 [docs/VERIFICATION.md](docs/VERIFICATION.md)。
 - 本插件通过 `agent/pre-step` 强制暂停，属于 Harness 公开扩展点；DSH 升级后若事件/服务签名变化需按 [docs/host-api.md](docs/host-api.md) 重新核对。
 
 ## 文档索引
@@ -161,10 +166,15 @@ node plugins/work-window/tools/make-offline.mjs   # 重新生成离线节假日�
 - [Host 侧 API 调研](docs/host-api.md)
 - [Client 侧 API 调研](docs/client-api.md)
 - [项目初始简报 BRIEF](BRIEF.md)
+- [English README](README.en.md)
+
+## License
+
+[MIT](LICENSE) © dsh-work-window contributors
 
 ## 版本管理
 
-仓库已初始化 git（默认分支 `main`），首次提交包含插件源码、调研文档与测试；`.scratch/`（从 DSH 安装包解包的调研产物）已通过 `.gitignore` 排除。
+仓库默认分支 `main`；`.scratch/`（从 DSH 安装包解包的调研产物）已通过 `.gitignore` 排除。
 
 ```powershell
 git log --oneline          # 查看提交

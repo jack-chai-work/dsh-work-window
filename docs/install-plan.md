@@ -1,8 +1,8 @@
 # 本地 bundle 安装与热加载方案（desktop profile）
 
-> 调研者：install-plan（task-4）。只做只读调研与 scratch 复现；**没有**修改真实 profile（`C:\Users\chai_\.dsh\profiles\desktop` 各文件 mtime 仍为 2026-10-23/26/10-30 17:57 应用启动时，见 §8）。
+> 调研者：install-plan（task-4）。只做只读调研与 scratch 复现；**没有**修改真实 profile（`$DSH_HOME\profiles\desktop` 各文件 mtime 均早于本次调查，见 §8）。
 > 结论证据来自 `.scratch/asar` 内已解包的 `dsh-plugin-manager`、`dsh-hmr`、`dsh-client-hmr`、`dsh-client-modules`、`dsh-app-boot`、`@deepseek-ai/dsh`（CLI/desktop-host）源码与 README，以及本机实测（§8）。
-> 目标插件包：`D:\program\dsh\plugins\work-window`，包名 `@local/dsh-work-window`（`package.json` / `cordis.patch.yml` / `index.js` / `client.js` / locale / icon 在调研末已齐备；其中 `client.js` 是 `tools/build-client.mjs` 的生成物、仍在迭代，**安装前必须重跑 §6.0 预检**）。
+> 目标插件包：`<plugin-dir>`，包名 `@local/dsh-work-window`（`package.json` / `cordis.patch.yml` / `index.js` / `client.js` / locale / icon 在调研末已齐备；其中 `client.js` 是 `tools/build-client.mjs` 的生成物、仍在迭代，**安装前必须重跑 §6.0 预检**）。
 
 ---
 
@@ -11,8 +11,8 @@
 **推荐用 GUI「插件」页的「添加插件 → 安装第三方插件 → 填本地绝对目录」安装，装完点「立即启用」；在当前 desktop profile 上 HMR 已启用，新装 bundle 会热重组生效，不需要重启应用，也不需要刷新浏览器页面；profile 文件由 Electron Host 自己写，agent 侧 0 次工作区外写入批准。**
 
 - 重启需求：**推荐路径 = 0 次重启**（若 GUI 弹出「请重启 DSH 使更改生效」才需 1 次重启，会中断本会话）。
-- 工作区外写入批准：GUI 路径 **0 次**（用户点鼠标，Host 进程自行写 profile）；若要 agent/脚本手动改 profile，则每次命令都要一次批准（本会话审批已禁用，实际只能由用户执行），见 §5.3。
-- 生效证据：`curl http://127.0.0.1:49729/plugins/events` 的图里出现 `@local/dsh-work-window` 行 + 侧栏出现「工作时段」入口；进程 StartTime 不变。
+- 工作区外写入批准：GUI 路径 **0 次**（用户点鼠标，Host 进程自行写 profile）；若要 agent/脚本手动改 profile，则每次命令都要一次批准（若 agent 没有审批通道，则只能由用户执行），见 §5.3。
+- 生效证据：`curl http://127.0.0.1:<GUI 端口>/plugins/events` 的图里出现 `@local/dsh-work-window` 行 + 侧栏出现「工作时段」入口；进程 StartTime 不变。
 
 ---
 
@@ -20,7 +20,7 @@
 
 ### 1.1 desktop profile 文件
 
-`C:\Users\chai_\.dsh\profiles\desktop\package.json`（311 B，mtime 2026-10-26 10:21:54，实测内容）：
+`$DSH_HOME\profiles\desktop\package.json`（调查时的实测内容）：
 
 ```json
 {
@@ -40,7 +40,7 @@
 ```
 
 - **没有 `dependencies` 字段**；bundle 全部由 DSH 安装包提供（安装锚点 = app.asar 里的 `dsh/package.json`）。
-- `cordis.patch.yml`（836 B，mtime 2026-10-23 11:36:16）只有 4 条 config override（agent-default-model / ui-settings-account / ui-chat / ui-settings），**没有任何 insert 行，也没有覆盖 `hmr` 行**。
+- `cordis.patch.yml` 只有 4 条 config override（agent-default-model / ui-settings-account / ui-chat / ui-settings），**没有任何 insert 行，也没有覆盖 `hmr` 行**。
 - `node_modules/@deepseek-ai` 为空目录；`node_modules` 里是 pnpm 的 `.pnpm`、`.modules.yaml` 等（`nodeLinker: hoisted`，`pnpm-workspace.yaml` 已存在）。
 - `.plugin-manager/logs/` 下有两个历史 operation 日志，证明该 profile 的包操作确实走 app 自带 pnpm：
   - `operation-2CM0z5/pnpm.log:28-31`：`+ @deepseek-ai/dsh-subagent-claude-code 0.2.1-rc.2`（安装）；
@@ -48,9 +48,9 @@
 
 ### 1.2 当前运行态
 
-- 两个 `DeepSeek Harness.exe` 进程（Main + Host），启动于 2026-10-30 17:57:58/59；Web GUI `http://127.0.0.1:49729`。
-- 本会话 shell 环境已带 `DSH_HOME=C:\Users\chai_\.dsh`、`DSH_PROFILE=desktop`、`DSH_PROFILE_DIR=C:\Users\chai_\.dsh\profiles\desktop`；按 skill 文档，这表示 Harness 是 profile 启动的（`.scratch/asar/.../cordis-plugin-development/SKILL.md:34`）。
-- `curl http://127.0.0.1:49729/plugins/events`（SSE，非破坏）首帧返回完整 client graph；`release: {version: "0.2.1-rc.5", commit: "d4db512"}`，entries 中包含 `@deepseek-ai/dsh-client-hmr`、`@deepseek-ai/dsh-client-modules`、`@deepseek-ai/dsh-client-ui-plugin-manager`。这是 **client HMR 通道已在线**的直接运行证据（`/` 返回 401，但 `/plugins/events` 可匿名只读连接）。
+- 两个 `DeepSeek Harness.exe` 进程（Main + Host）；Web GUI `http://127.0.0.1:<GUI 端口>`。
+- 本会话 shell 环境已带 `DSH_HOME=$DSH_HOME`、`DSH_PROFILE=desktop`、`DSH_PROFILE_DIR=$DSH_HOME\profiles\desktop`；按 skill 文档，这表示 Harness 是 profile 启动的（`.scratch/asar/.../cordis-plugin-development/SKILL.md:34`）。
+- `curl http://127.0.0.1:<GUI 端口>/plugins/events`（SSE，非破坏）首帧返回完整 client graph；`release: {version: "0.2.1-rc.5", commit: "d4db512"}`，entries 中包含 `@deepseek-ai/dsh-client-hmr`、`@deepseek-ai/dsh-client-modules`、`@deepseek-ai/dsh-client-ui-plugin-manager`。这是 **client HMR 通道已在线**的直接运行证据（`/` 返回 401，但 `/plugins/events` 可匿名只读连接）。
 
 ### 1.3 Host 侧 HMR 是否启用的证据链
 
@@ -118,13 +118,13 @@ GUI「插件」页的安装按钮调的是同一个 Host 服务：
     "@local/dsh-work-window"                  // ← 追加在最后
   ] } },
   "dependencies": {
-    "@local/dsh-work-window": "link:D:/program/dsh/plugins/work-window"  // ← pnpm 记录 link: 绝对路径
+    "@local/dsh-work-window": "link:<plugin-dir>"  // ← pnpm 记录 link: 绝对路径
   }
 }
 ```
 
-- `node_modules/@local/dsh-work-window` 是 **NTFS Junction（目录联接）**，Target = `D:\program\dsh\plugins\work-window`（跨盘可用，无需管理员/开发者模式；符号链接才需要）。实测 `Get-Item -Force` 显示 `LinkType : Junction`。
-- `pnpm-lock.yaml` 新增 importer 条目，跨盘时 version 也是绝对 `link:D:/program/dsh/plugins/work-window`。
+- `node_modules/@local/dsh-work-window` 是 **NTFS Junction（目录联接）**，Target = `<plugin-dir>`（跨盘可用，无需管理员/开发者模式；符号链接才需要）。实测 `Get-Item -Force` 显示 `LinkType : Junction`。
+- `pnpm-lock.yaml` 新增 importer 条目，跨盘时 version 也是绝对 `link:<plugin-dir>`。
 - `node_modules/.modules.yaml`、`.pnpm-workspace-state-v1.json` 由 pnpm 更新；`.plugin-manager/logs/operation-*/pnpm.log` 新增一次运行日志。
 - **`cordis.patch.yml` 不变**（这一点最容易误解：install 不往用户 patch 里写 insert 行）。
 - `files` 字段不生效：本地目录安装是“链接 checkout”，不 pack，所以 `files` 漏掉的文件实际也能被读取（`.scratch/.../references/host-plugin.md:35`）。
@@ -178,13 +178,13 @@ GUI「插件」页的安装按钮调的是同一个 Host 服务：
 | 入口 | `manageDesktopProfile` | desktop 支持 | 证据 |
 |---|---|---|---|
 | 普通 npm 安装的 `dsh`（`@deepseek-ai/dsh/lib/bin.js` 直跑） | `false`（默认） | **拒绝** | `bin.js:101-112` 的 `rejectElectronProfile`；`bin.js:119` `if (!manageDesktopProfile) rejectElectronProfile(...)` |
-| Desktop 自带启动器 `D:\software\DeepSeek Harness\resources\runtime\cli\bin\dsh.cmd` | `true` | `plugin` 子命令**允许**（boot/dump 仍拒绝） | `dsh-desktop-host/lib/cli.js:94-108`（`runCli({manageDesktopProfile:true, packageManager: 内置 pnpm})`）；`dsh.cmd` 内容见该目录 |
+| Desktop 自带启动器 `<DSH-install-dir>\resources\runtime\cli\bin\dsh.cmd` | `true` | `plugin` 子命令**允许**（boot/dump 仍拒绝） | `dsh-desktop-host/lib/cli.js:94-108`（`runCli({manageDesktopProfile:true, packageManager: 内置 pnpm})`）；`dsh.cmd` 内容见该目录 |
 
 ### 4.2 实测结果
 
 ```text
 # 1) desktop 自带 CLI：plugin --help 正常，说明 desktop 的 plugin 子命令被放行
-> & "D:\software\DeepSeek Harness\resources\runtime\cli\bin\dsh.cmd" plugin --profile desktop --help
+> & "<DSH-install-dir>\resources\runtime\cli\bin\dsh.cmd" plugin --profile desktop --help
 Usage: dsh plugin [options] [args...]
   --profile <name>  the profile whose plugins to manage
   -h, --help        show this help
@@ -205,16 +205,16 @@ EXIT=1
 
 ```text
 $env:DSH_HOME = <临时目录>\home        # 复制真实 profile 的 package.json/cordis.patch.yml/pnpm-workspace.yaml
-& "D:\software\DeepSeek Harness\resources\runtime\cli\bin\dsh.cmd" plugin --profile desktop add "D:\program\dsh\plugins\work-window"
+& "<DSH-install-dir>\resources\runtime\cli\bin\dsh.cmd" plugin --profile desktop add "<plugin-dir>"
 
 [WARN] The store ... using the store at <temp>\.pnpm-store\v11 instead.
 dependencies:
-+ @local/dsh-work-window 1.0.0 <- D:\program\dsh\plugins\work-window
++ @local/dsh-work-window 1.0.0 <- <plugin-dir>
 Done in 451ms using pnpm v11.28.5
 EXIT=0
 ```
 
-结果与 §2.3 一致（dependency `link:D:/program/dsh/plugins/work-window`、bundles 追加、Junction 指向 D 盘、lock 更新）。**结论：CLI 可用，但仅指 desktop 自带 `dsh.cmd` 的 `plugin` 子命令；普通 `dsh` 不行，--dump-config 对 desktop 永远不行。**
+结果与 §2.3 一致（dependency `link:<plugin-dir>`、bundles 追加、Junction 指向 D 盘、lock 更新）。**结论：CLI 可用，但仅指 desktop 自带 `dsh.cmd` 的 `plugin` 子命令；普通 `dsh` 不行，--dump-config 对 desktop 永远不行。**
 
 ### 4.4 但 CLI 路径“不推荐用于当前运行中的应用”
 
@@ -235,7 +235,7 @@ EXIT=0
 
 1. 左侧栏点 **「插件」**（Plugins）。
 2. 点 **「添加插件」**主按钮；或点旁边箭头 → **「安装第三方插件」**（支持 npm 包、Git 仓库和本地目录）。
-3. 在「包名或地址」输入框填 **`D:\program\dsh\plugins\work-window`**（必须是**绝对路径**；`parseInstallSpec` 要求绝对路径，见 `install-spec.js:58-66`；不要加引号，可省略 `file:`/`link:` 前缀）。
+3. 在「包名或地址」输入框填 **`<plugin-dir>`**（必须是**绝对路径**；`parseInstallSpec` 要求绝对路径，见 `install-spec.js:58-66`；不要加引号，可省略 `file:`/`link:` 前缀）。
 4. Registry 选项对本地路径无影响（不会查 registry），保持默认即可；阅读信任提示后点 **「安装」**。
    - Host 先用 `inspect` 读取该目录的 `package.json`：路径不存在 →「该路径不存在或不是有效的插件包」；没有 `dsh.bundle` →「这个包没有声明组合包，无法作为插件安装」。
    - 安装期间显示「插件安装中…」，pnpm 命令与输出可在「Show install details / 安装详情」里看到；底层是 app 自带 pnpm（实测 pnpm v11.28.5，日志写到 `profile/.plugin-manager/logs/operation-*/pnpm.log`）。
@@ -250,9 +250,9 @@ EXIT=0
 
 | 文件 | 变化 |
 |---|---|
-| `C:\Users\chai_\.dsh\profiles\desktop\package.json` | `dependencies["@local/dsh-work-window"] = "link:D:/program/dsh/plugins/work-window"`；`dsh.profile.bundles` 末尾追加 `@local/dsh-work-window` |
-| `C:\Users\chai_\.dsh\profiles\desktop\pnpm-lock.yaml` | 新增 link importer 条目 |
-| `C:\Users\chai_\.dsh\profiles\desktop\node_modules\@local\dsh-work-window` | 新建 Junction → `D:\program\dsh\plugins\work-window` |
+| `$DSH_HOME\profiles\desktop\package.json` | `dependencies["@local/dsh-work-window"] = "link:<plugin-dir>"`；`dsh.profile.bundles` 末尾追加 `@local/dsh-work-window` |
+| `$DSH_HOME\profiles\desktop\pnpm-lock.yaml` | 新增 link importer 条目 |
+| `$DSH_HOME\profiles\desktop\node_modules\@local\dsh-work-window` | 新建 Junction → `<plugin-dir>` |
 | `...\node_modules\.modules.yaml`、`.pnpm-workspace-state-v1.json` | pnpm 元数据更新 |
 | `...\.plugin-manager\logs\operation-*\pnpm.log` | 新增安装日志 |
 | `cordis.patch.yml` | **不变** |
@@ -268,9 +268,9 @@ EXIT=0
 Get-Process 'DeepSeek Harness' -ErrorAction SilentlyContinue   # 期望空
 
 # 2) 使用 Desktop 自带的 CLI（不要用 PATH 里的普通 dsh；若 dsh 指向该启动器可用 dsh）
-& "D:\software\DeepSeek Harness\resources\runtime\cli\bin\dsh.cmd" plugin --profile desktop add "D:\program\dsh\plugins\work-window"
+& "<DSH-install-dir>\resources\runtime\cli\bin\dsh.cmd" plugin --profile desktop add "<plugin-dir>"
 
-# 期望输出：dependencies: + @local/dsh-work-window 1.0.0 <- D:\program\dsh\plugins\work-window
+# 期望输出：dependencies: + @local/dsh-work-window 1.0.0 <- <plugin-dir>
 #            Done in ... using pnpm v11.28.5   （实测 451ms，跨盘 Junction）
 
 # 3) 重新启动 DSH 桌面应用（用户操作）
@@ -291,20 +291,20 @@ Get-Process 'DeepSeek Harness' -ErrorAction SilentlyContinue   # 期望空
 #### C-1 创建 Junction（不改文件内容）
 
 ```powershell
-$target = 'D:\program\dsh\plugins\work-window'
+$target = '<plugin-dir>'
 $link   = Join-Path $env:DSH_PROFILE_DIR 'node_modules\@local\dsh-work-window'
 New-Item -ItemType Directory -Force (Split-Path $link) | Out-Null
 if (-not (Test-Path -LiteralPath $link)) {
   New-Item -ItemType Junction -Path $link -Target $target | Out-Null
 }
 (Get-Item -LiteralPath $link -Force) | Select-Object LinkType,Target
-# 期望 LinkType=Junction, Target=D:\program\dsh\plugins\work-window
+# 期望 LinkType=Junction, Target=<plugin-dir>
 ```
 
 #### C-2 一次原子写 `package.json`（同时改 dependencies + bundles，触发 HMR 重组）
 
 ```powershell
-node -e "const fs=require('fs'),path=require('path');const dir=process.env.DSH_PROFILE_DIR;const p=path.join(dir,'package.json');const m=JSON.parse(fs.readFileSync(p,'utf8'));m.dependencies=Object.assign({},m.dependencies,{'@local/dsh-work-window':'link:D:/program/dsh/plugins/work-window'});m.dsh=m.dsh||{};m.dsh.profile=m.dsh.profile||{};const b=m.dsh.profile.bundles=m.dsh.profile.bundles||[];if(!b.includes('@local/dsh-work-window'))b.push('@local/dsh-work-window');const tmp=p+'.tmp';fs.writeFileSync(tmp,JSON.stringify(m,null,2)+'\n');fs.renameSync(tmp,p);console.log('written',p);"
+node -e "const fs=require('fs'),path=require('path');const dir=process.env.DSH_PROFILE_DIR;const p=path.join(dir,'package.json');const m=JSON.parse(fs.readFileSync(p,'utf8'));m.dependencies=Object.assign({},m.dependencies,{'@local/dsh-work-window':'link:<plugin-dir>'});m.dsh=m.dsh||{};m.dsh.profile=m.dsh.profile||{};const b=m.dsh.profile.bundles=m.dsh.profile.bundles||[];if(!b.includes('@local/dsh-work-window'))b.push('@local/dsh-work-window');const tmp=p+'.tmp';fs.writeFileSync(tmp,JSON.stringify(m,null,2)+'\n');fs.renameSync(tmp,p);console.log('written',p);"
 ```
 
 改后的完整期望内容（与 GUI/CLI 实测结果一致）：
@@ -325,7 +325,7 @@ node -e "const fs=require('fs'),path=require('path');const dir=process.env.DSH_P
     }
   },
   "dependencies": {
-    "@local/dsh-work-window": "link:D:/program/dsh/plugins/work-window"
+    "@local/dsh-work-window": "link:<plugin-dir>"
   }
 }
 ```
@@ -372,10 +372,10 @@ Remove-Item -LiteralPath (Join-Path $env:DSH_PROFILE_DIR 'node_modules\@local\ds
 
 ### 6.0 包完整性检查
 
-> 时间线：调研开始时（2026-10-30 18:23）`plugins/work-window` 有 `package.json`、`cordis.patch.yml`、`index.js`、`locale/*.json`、`icon.svg`、`shared/holiday.js`，**没有 `client.js`**；18:27 已由 `tools/build-client.mjs` 生成并通过 `node --check`（58 KB，自包含）。该文件仍在随实现迭代重建——调研中曾抓到一次“生成中间态”的语法错误，说明**必须等构建结束再跑本预检**。若 `client.js` 缺失或语法错：Host 行可能激活但 client 图行加载失败/侧栏不出现；安装成功不代表模块能激活（`dsh-plugin-manager/README.md:52`：“A successful installation does not certify that a module can activate.”）。
+> 时间线：调研开始时 `plugins/work-window` 有 `package.json`、`cordis.patch.yml`、`index.js`、`locale/*.json`、`icon.svg`、`shared/holiday.js`，**没有 `client.js`**；随后已由 `tools/build-client.mjs` 生成并通过 `node --check`（58 KB，自包含）。该文件仍在随实现迭代重建——调研中曾抓到一次“生成中间态”的语法错误，说明**必须等构建结束再跑本预检**。若 `client.js` 缺失或语法错：Host 行可能激活但 client 图行加载失败/侧栏不出现；安装成功不代表模块能激活（`dsh-plugin-manager/README.md:52`：“A successful installation does not certify that a module can activate.”）。
 
 ```powershell
-$pkgDir = 'D:\program\dsh\plugins\work-window'
+$pkgDir = '<plugin-dir>'
 $pkg = Get-Content "$pkgDir\package.json" -Raw | ConvertFrom-Json
 $problems = @()
 foreach ($f in @('index.js','client.js','cordis.patch.yml')) {
@@ -399,7 +399,7 @@ if ($problems.Count -eq 0) { 'PREFLIGHT OK' } else { $problems }
 - `dsh.client.inject` 目前是 `["@deepseek-ai/dsh-client-ui-sidebar", "@deepseek-ai/dsh-client-ui-layout", "@deepseek-ai/dsh-client-ui-conversation"]`，这三个 id 都在当前 graph 中（§1.2/§8 T8），OK。
 - `dsh.client.immediately: true` 会让页面在新图中立即加载该 entry。
 - `platform` 必须是字符串 `"web"`，否则 `client-modules/lib/index.js:733` 直接跳过，不报错但侧栏永远不会出现。
-- 当前 `client.js`（18:27 生成）实测只 `require('react')`（baseline 模块表内），无其它非 baseline 依赖，因此不需要 `dsh.client.external`；`loader.load({id: '@local/dsh-work-window', ...})` 与包名一致，满足 client-modules 的 row id 约定（`dsh-client-modules/README.md:34、:76`）。
+- 当前 `client.js`（生成产物）实测只 `require('react')`（baseline 模块表内），无其它非 baseline 依赖，因此不需要 `dsh.client.external`；`loader.load({id: '@local/dsh-work-window', ...})` 与包名一致，满足 client-modules 的 row id 约定（`dsh-client-modules/README.md:34、:76`）。
 
 ### 6.2 其他预检
 
@@ -416,17 +416,17 @@ if ($problems.Count -eq 0) { 'PREFLIGHT OK' } else { $problems }
 
 ```powershell
 $m = Get-Content (Join-Path $env:DSH_PROFILE_DIR 'package.json') -Raw | ConvertFrom-Json
-$m.dependencies.'@local/dsh-work-window'          # 期望 link:D:/program/dsh/plugins/work-window
+$m.dependencies.'@local/dsh-work-window'          # 期望 link:<plugin-dir>
 $m.dsh.profile.bundles -contains '@local/dsh-work-window'   # 期望 True
 $link = Get-Item -LiteralPath (Join-Path $env:DSH_PROFILE_DIR 'node_modules\@local\dsh-work-window') -Force
-$link.LinkType; $link.Target                      # 期望 Junction / D:\program\dsh\plugins\work-window
+$link.LinkType; $link.Target                      # 期望 Junction / <plugin-dir>
 ```
 
 ### 7.2 运行时验证：client graph 是否包含新行（最可靠，无需重启）
 
 ```powershell
 $graph = Join-Path $env:TEMP 'dsh-plugins-events.txt'
-curl.exe -s -N --max-time 4 http://127.0.0.1:49729/plugins/events > $graph 2>$null
+curl.exe -s -N --max-time 4 http://127.0.0.1:<GUI 端口>/plugins/events > $graph 2>$null
 Select-String -Path $graph -Pattern '@local/dsh-work-window' | Select-Object -First 1
 # 期望命中形如：
 # data: {"type":"graph","graph":{"rev":"...","release":{"version":"0.2.1-rc.5","commit":"d4db512"},
@@ -480,10 +480,10 @@ Get-Process 'DeepSeek Harness' | Select-Object Id,StartTime
 | T3 | 普通 `dsh/lib/bin.js --profile desktop --dump-config` | 同上硬拒绝，EXIT=1；确认 desktop 不能用 dump 验证 |
 | T4 | 临时 `DSH_HOME` + scratch `desktop` profile（复制真实 package.json/patch/workspace）+ 本地 mock 插件（C: 盘）→ `dsh.cmd plugin --profile desktop add <mock>` | 999ms 成功；依赖 `link:C:/...`；bundles 追加；`node_modules/@local/work-window-probe` 为 **Junction**；lock 生成 |
 | T5 | T4 的 profile 用普通 CLI `--profile probe --dump-config`（复制成 probe 名） | 输出包含 `# == @local/work-window-probe` / `- id: work-window-probe`，无 skipping → 手工 dependency+Junction+bundles 足以让组合解析成功 |
-| T6 | 用**真实插件路径** `D:\program\dsh\plugins\work-window` 在另一 scratch desktop profile 安装（跨盘） | 451ms 成功；`@local/dsh-work-window: link:D:/program/dsh/plugins/work-window`；bundles 追加；Junction Target=`D:\program\dsh\plugins\work-window`；lock `version: link:D:/program/dsh/plugins/work-window` |
+| T6 | 用**真实插件路径** `<plugin-dir>` 在另一 scratch desktop profile 安装（跨盘） | 451ms 成功；`@local/dsh-work-window: link:<plugin-dir>`；bundles 追加；Junction Target=`<plugin-dir>`；lock `version: link:<plugin-dir>` |
 | T7 | 把 T6 的包复制成 `probe2` 并用普通 CLI `--dump-config` | 输出包含 `- id: work-window` 与完整 config（timeZone/pauseWindows/holidayApiUrl/cacheTtlHours/confirmDuringPause），无 skipping → 跨盘 Junction 解析 OK |
-| T8 | `curl -s -N --max-time 4 http://127.0.0.1:49729/plugins/events` | 首帧完整 graph；`release.version=0.2.1-rc.5`、`commit=d4db512`；entries 含 `dsh-client-hmr`、`dsh-client-modules`、`dsh-client-ui-plugin-manager`；`/` 返回 401 |
-| T9 | 真实 profile 只读核对 | `package.json` 311B/2026-10-26 10:21:54、`cordis.patch.yml` 836B/2026-10-23 11:36:16、`cordis.yml` 223B/2026-10-30 17:57:59（应用启动时写）、`node_modules/@deepseek-ai` 为空；**调研期间未改真实 profile** |
+| T8 | `curl -s -N --max-time 4 http://127.0.0.1:<GUI 端口>/plugins/events` | 首帧完整 graph；`release.version=0.2.1-rc.5`、`commit=d4db512`；entries 含 `dsh-client-hmr`、`dsh-client-modules`、`dsh-client-ui-plugin-manager`；`/` 返回 401 |
+| T9 | 真实 profile 只读核对 | `package.json`、`cordis.patch.yml`、`cordis.yml` 内容与预期一致；`node_modules/@deepseek-ai` 为空；**调研期间未改真实 profile** |
 | T10 | `pnpm --version`（PATH） | 10.15.0（与 app 自带 11.28.5 不同；安装请让 Host/desktop CLI 用其自带 pnpm，不要用 PATH 里的 pnpm 手跑） |
 
 ---
@@ -514,7 +514,7 @@ Get-Process 'DeepSeek Harness' | Select-Object Id,StartTime
 
 ---
 
-## 11. 证据索引（路径均相对 `D:\program\dsh`）
+## 11. 证据索引（路径均相对 `<workspace>`）
 
 - `.scratch/asar/dsh/node_modules/@deepseek-ai/dsh-plugin-manager/README.md`：14（HMR/重启）、31（profile 持久化、安装代码进程内执行）、40（bundle toggle 只改 bundles；安装默认启用）、44（source spec）、48（inspect）、52（install 行为、restart-required、激活失败不回滚）、60（requestId/日志）、64（build scripts）、69-75（兼容/exemption）、98-104（HMR 队列、文件锁、恢复）、141-146（限制；Desktop 包操作归 shell）、155-162（失败处理表）
 - `.scratch/asar/dsh/node_modules/@deepseek-ai/dsh-plugin-manager/README.zh.md`：14、50、52、73、100、118、140-141（对应中文表述）
@@ -540,4 +540,4 @@ Get-Process 'DeepSeek Harness' | Select-Object Id,StartTime
 - `.scratch/asar/dsh/node_modules/@deepseek-ai/dsh-agent-preset/skills/cordis-plugin-development/SKILL.md`：8-10（用 install_bundle，不要手写 profile/pnpm；每次工作区外写都要批准）、34（DSH_PROFILE 证明 profile 启动）
 - `…/references/host-plugin.md`：7-27（Host-only manifest/patch 模板）、31-35（展示资源清单；本地目录安装是链接 checkout，files 不过滤）、57-64（index.js 导出形态/Config）、66-70（安装/观察；新 bundle 可经 HMR 激活，替换包需重启）
 - `…/templates/decoration/`（package.json / cordis.patch.yml / client.js / index.js：单行 insert + client half 模板；client.js 的 `__ModuleLoader__.load` 格式）
-- 运行态：`C:\Users\chai_\.dsh\profiles\desktop\.plugin-manager\logs\operation-2CM0z5\pnpm.log:28-31`（历史安装 + pnpm 11.28.5）、`operation-qZQF7s\pnpm.log:4-6`（历史卸载）
+- 运行态：`$DSH_HOME\profiles\desktop\.plugin-manager\logs\operation-2CM0z5\pnpm.log:28-31`（历史安装 + pnpm 11.28.5）、`operation-qZQF7s\pnpm.log:4-6`（历史卸载）

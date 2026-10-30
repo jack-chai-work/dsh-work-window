@@ -1,6 +1,8 @@
 # BRIEF — DSH 工作时段插件（Work Window Plugin）
 
-> 本文件是给所有协作者的唯一背景说明。请先读完再动手。所有路径均为 Windows 原生路径。
+> 本文件是项目启动时的任务简报，保留作协作记录；其中的本机绝对路径已占位化
+> （`<workspace>`、`<plugin-dir>`、`<DSH-install-dir>`、`$DSH_HOME`，含义见根 [README.md](README.md)）。
+> 当前仓库结构与使用方式以 [README.md](README.md) 为准；`.scratch/` 为本地 asar 解包产物（已被 git 忽略）。
 
 ## 1. 目标
 
@@ -15,22 +17,22 @@
 
 ## 2. 环境事实（已核实）
 
-- 工作区（可写）：`D:\program\dsh`，沙箱模式 workspace-write。**不要写工作区以外的文件。**
-- DSH 安装包（打包在 asar，只读参考）：`D:\software\DeepSeek Harness\resources\app.asar`
-  - 直接读取 asar 内的文件不可行，已解包到：`D:\program\dsh\.scratch\asar\`
-  - 解包工具：`D:\program\dsh\.scratch\asar-tool.mjs`
-    - 列目录：`node .scratch/asar-tool.mjs "<asar>" list "<substring>"`
-    - 解包前缀：`$env:ASAR_OUT='D:\program\dsh\.scratch\asar'; node .scratch/asar-tool.mjs "<asar>" extract "dsh/node_modules/@deepseek-ai/<pkg>"`
-    - asar 路径：`D:\software\DeepSeek Harness\resources\app.asar`
+- 工作区（可写）：`<workspace>`，沙箱模式 workspace-write。**不要写工作区以外的文件。**
+- DSH 安装包（打包在 asar，只读参考）：`<DSH-install-dir>\resources\app.asar`
+  - 直接读取 asar 内的文件不可行，已解包到：`<workspace>\.scratch\asar\`
+  - 解包工具：`<workspace>\tools\extract-asar.mjs`
+    - 列目录：`node tools/extract-asar.mjs "<asar>" list "<substring>"`
+    - 解包前缀：`$env:ASAR_OUT='<workspace>\.scratch\asar'; node tools/extract-asar.mjs "<asar>" extract "dsh/node_modules/@deepseek-ai/<pkg>"`
+    - asar 路径：`<DSH-install-dir>\resources\app.asar`
 - 已解包的包：`dsh-agent-preset`(插件开发 skill，见 `skills/cordis-plugin-development/`)、`dsh-agent`、`dsh-agent-loop`、`dsh-web-app`、`dsh-base`、`dsh-experimental-agent-team-profile`、`dsh-client-ui-*`(sidebar/layout/conversation/chat/plugin-manager/approval/user-questions)、`dsh-user-questions`、`dsh-user-approval`、`dsh-system-prompt`、`dsh-schedule`、`dsh-plugin-manager`、`dsh-client-ui-entry-customization`。
   - 如需更多包（如 `dsh-session`、`dsh-commands`、`dsh-client-ui-commands`、`dsh-api-remotes`、`dsh-cordis-plugin-loader` 等），用上面的 extract 命令自行解包。**不要修改 `.scratch` 下已解包内容。**
-- 运行中的应用：DSH 桌面端，Web GUI `http://127.0.0.1:49729`，当前 profile：`desktop`。
-- profile 目录（**不可由我们写，由 Electron 独占管理**）：`C:\Users\chai_\.dsh\profiles\desktop`
+- 运行中的应用：DSH 桌面端，Web GUI `http://127.0.0.1:<GUI 端口>`，当前 profile：`desktop`。
+- profile 目录（**不可由我们写，由 Electron 独占管理**）：`$DSH_HOME\profiles\desktop`
   - 结构：`package.json`（`dsh.profile.bundles` 列出组合包）、`cordis.patch.yml`（用户 patch 层）、`node_modules`（profile 安装的包）、`.plugin-manager/`。
 - **本会话没有 `plugin_manager` / `cordis_inspect_*` 工具**（当前 preset 不提供）。因此不能调用官方安装工具；安装方案见 §5。
 - 工具链：`node v24.22.1`、`pnpm`、`pwsh` 可用；工作区可联网（待验证，`web_fetch` 工具可用）。
 - 插件开发官方文档（**必读**）：
-  - `D:\program\dsh\.scratch\asar\dsh\node_modules\@deepseek-ai\dsh-agent-preset\skills\cordis-plugin-development\SKILL.md`
+  - `<workspace>\.scratch\asar\dsh\node_modules\@deepseek-ai\dsh-agent-preset\skills\cordis-plugin-development\SKILL.md`
   - 同目录 `references/host-plugin.md`、`references/ui-plugin.md`、`references/practices.md`、`references/verification.md`、`references/user-actions.md`
   - 模板：`templates/decoration/`（package.json / cordis.patch.yml / index.js / client.js / locale/en.json / icon.svg）
 
@@ -96,20 +98,20 @@
 
 本会话无 `plugin_manager` 工具，profile 由 Electron 独占。候选方案：
 
-- A. 直接编辑 profile（需用户批准每次工作区外写入）：把插件包放进 `C:\Users\chai_\.dsh\profiles\desktop\node_modules\<包名>`（本地目录通常用 junction/symlink），并把 `cordis.patch.yml` 中追加 insert 行、`package.json` 的 `dsh.profile.bundles` 追加包名。之后确认 Loader 是否 watch 并热加载；否则需重启应用（会中断本会话，需要用户操作）。
+- A. 直接编辑 profile（需用户批准每次工作区外写入）：把插件包放进 `$DSH_HOME\profiles\desktop\node_modules\<包名>`（本地目录通常用 junction/symlink），并把 `cordis.patch.yml` 中追加 insert 行、`package.json` 的 `dsh.profile.bundles` 追加包名。之后确认 Loader 是否 watch 并热加载；否则需重启应用（会中断本会话，需要用户操作）。
 - B. 交付插件包 + 让用户在 GUI「插件」页用「从本地目录安装」完成安装（Host 端有正规安装器），我们负责验证插件文件与说明。
 - C. 用 `dsh plugin --profile desktop add <path>` CLI（可能被 "managed exclusively by Electron" 拒绝，需验证）。
 - 调研者需读 `dsh-plugin-manager` 的 `README.md` 与 `lib/index.js`，给出**准确的**本地目录安装会做的文件操作与热加载条件（是否 watch、是否需重启），以及 A/B/C 的可行性结论。
 
 ## 6. 交付物与协作约定
 
-- 最终插件包目录（Lead 汇总）：`D:\program\dsh\plugins\work-window\`。
+- 最终插件包目录（Lead 汇总）：`<plugin-dir>\`。
 - 调研笔记（各调研者写自己的文件，互不覆盖）：
-  - `D:\program\dsh\docs\host-api.md`（Host 侧 API 证据 + 代码片段 + 文件:行号）
-  - `D:\program\dsh\docs\client-api.md`（Client 侧 API 证据 + 可运行的最小 client.js 骨架）
-  - `D:\program\dsh\shared\holiday.mjs`（纯函数 + 单测脚本）
-  - `D:\program\dsh\docs\install-plan.md`（安装/热加载方案）
+  - `<workspace>\docs\host-api.md`（Host 侧 API 证据 + 代码片段 + 文件:行号）
+  - `<workspace>\docs\client-api.md`（Client 侧 API 证据 + 可运行的最小 client.js 骨架）
+  - `<workspace>\shared\holiday.mjs`（纯函数 + 单测脚本）
+  - `<workspace>\docs\install-plan.md`（安装/热加载方案）
 - 工作区已清理出 `.scratch/`（asar 解包）与 `docs/`、`shared/`、`plugins/` 目录，请只写自己的文件。
 - 代码与注释用中文/英文皆可；对外文案中文为主、英文齐全。
-- 不要执行会重启/杀死当前桌面应用的命令；不要写 `C:\Users\chai_\.dsh` 下任何文件（调研只读）。
+- 不要执行会重启/杀死当前桌面应用的命令；不要写 `$DSH_HOME` 下任何文件（调研只读）。
 - 每个结论都要有**证据**：README 段落或 `lib/index.js` 的代码片段（带文件路径与行号），不要凭记忆猜 API。

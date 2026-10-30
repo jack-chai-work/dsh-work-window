@@ -1,6 +1,6 @@
 # Client（浏览器半区）API 调研 — 侧栏入口 / 面板 slot / locale / Host↔Client 通道
 
-> 调研者：`client-api`（task-2）。所有结论均给证据（路径:行号+片段）。证据全部来自 `D:\program\dsh\.scratch\asar\`（asar 解包，只读参考）。
+> 调研者：`client-api`（task-2）。所有结论均给证据（路径:行号+片段）。证据全部来自 `<workspace>\.scratch\asar\`（asar 解包，只读参考）。
 > 下文路径统一以工作区为根，省略前缀 `.scratch/asar/dsh/node_modules/@deepseek-ai/`，写成 `dsh-client-ui-sidebar/lib/client.js:226` 这类形式。
 > 标注 **未验证** 的条目表示：解包内容里找不到直接证据，或需要在运行中的应用上实测才能确认。
 
@@ -20,13 +20,13 @@
 | client.js 打包格式 | `window.__ModuleLoader__.load({ id: "<包名>", factory(require) { ... return { apply, inject } } })`；`id` 必须等于 `package.json` 的 `name` | `templates/decoration/client.js:1-22`；`references/ui-plugin.md:9`；`dsh-client-ui-entry-customization/lib/client.js:1-4` |
 | package.json | `exports["./client"]` 必填（缺失时 Host 直接报错），`dsh.client = { platform:"web", immediately?:true, inject?:["<客户端包id>"], external?:[...] }` | `dsh-client-modules/lib/index.js:738`；`dsh-client-modules/README.md:34,50`；`templates/decoration/package.json:6-20`；`dsh-client-ui-plugin-manager/package.json:16-47` |
 | 主题 | 只用 `--dsw-alias-*` token，禁止硬编码颜色；可照抄 plugin-manager 页面的容器 CSS | `references/practices.md:34`；`dsh-client-ui-plugin-manager/lib/client.js:1913`（页面 CSS 字符串） |
-| 骨架 | 可运行最小骨架：`D:\program\dsh\prototype\client.js` | 本文件 §9 |
+| 骨架 | 可运行最小骨架：`<workspace>\prototype\client.js` | 本文件 §9 |
 
 ---
 
 ## 1. 证据与环境
 
-- asar：`D:\software\DeepSeek Harness\resources\app.asar`；解包目录 `D:\program\dsh\.scratch\asar\`。
+- asar：`<DSH-install-dir>\resources\app.asar`；解包目录 `<workspace>\.scratch\asar\`。
 - 本次新增解包（只解包、未改动已有内容）：`dsh-api-remotes`、`dsh-client-locale`、`dsh-commands`、`dsh-client-ui-commands`、`dsh-client-shortcuts`、`dsh-typert-protocol`、`dsh-client-modules`、`dsh-client-ui-theme`、`dsh-client-ui-schedule`、`dsh-client-ui-jobs`、`dsh-client-ui-settings`、`dsh-client-ui-settings-plugins`、`dsh-web-frontend/dist/assets/index-BXV-oxvX.js`。
 - `@deepseek-ai/dsh-client-ui-slots` 包**不在** asar 内（`slots` 服务由 Web 前端 shell 提供），因此 `ctx.slots.*` 的完整类型签名无法直接引用，本文件里的注册参数表是从**真实注册代码**反推的（下表逐项标注出处）。用 `Slots.listSubTree` 的官方探查（skill 里提到）本会话不可用。
 
@@ -533,7 +533,7 @@ UI 模板（`templates/decoration/package.json:6-20`）：
 
 ## 9. 可运行最小骨架：`prototype/client.js`
 
-已写入 `D:\program\dsh\prototype\client.js`，内容要点（详细见文件内注释）：
+已写入 `<workspace>\prototype\client.js`，内容要点（详细见文件内注释）：
 
 1. `window.__ModuleLoader__.load({ id: '@local/dsh-work-window', factory(require) {...} })`（id 必须与最终包名一致，安装前改）。
 2. 只 `require('react')`；用 `React.createElement`，不引入任何 Harness 客户端包。

@@ -3,11 +3,11 @@
 > 调研者：host-api（task-1）。所有结论均来自安装包内的**已解包**代码或 README，并给出行号。
 > 未运行验证的推断会显式标注「未验证」。
 >
-> **路径简写**（下文所有 `ASAR/...` 均指从 `D:\software\DeepSeek Harness\resources\app.asar` 解包出的
-> `D:\program\dsh\.scratch\asar\`，原始 asar 内路径为 `dsh/node_modules/...`）：
+> **路径简写**（下文所有 `ASAR/...` 均指从 `<DSH-install-dir>\resources\app.asar` 解包出的
+> `<workspace>\.scratch\asar\`，原始 asar 内路径为 `dsh/node_modules/...`）：
 >
 > - `ASAR/@deepseek-ai/<pkg>/...` = `.scratch\asar\dsh\node_modules\@deepseek-ai\<pkg>\...`
-> - 解包命令：`$env:ASAR_OUT='D:\program\dsh\.scratch\asar'; node .scratch/asar-tool.mjs "D:\software\DeepSeek Harness\resources\app.asar" extract "dsh/node_modules/@deepseek-ai/<pkg>"`
+> - 解包命令：`$env:ASAR_OUT='<workspace>\.scratch\asar'; node .scratch/asar-tool.mjs "<DSH-install-dir>\resources\app.asar" extract "dsh/node_modules/@deepseek-ai/<pkg>"`
 >
 > 本次额外解包（原 BRIEF 未列）：`@deepseek-ai/cordis`、`cordis-plugin-timer`、`dsh-scope`、`dsh-session`、
 > `dsh-goal`、`dsh-goal-round-driver`、`dsh-api-gateway`、`dsh-cordis-host-runner`、`dsh-sandbox`、`dsh`。
