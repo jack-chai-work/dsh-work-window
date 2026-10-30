@@ -1,0 +1,20 @@
+# Work-window bundle patch: one row that carries both halves.
+#
+# The Host half (index.js) enforces the working window: it adds a prompt section
+# describing the policy and gates `agent/pre-step`, so no model request starts
+# during a pause window until the user confirms. The Client half (client.js)
+# adds the sidebar entry, its panel and the composer reminder.
+#
+# `config` is validated by the standard-schema `Config` exported from index.js;
+# omitted fields fall back to the defaults below.
+- insert:
+    - id: work-window
+      name: '@local/dsh-work-window'
+      config:
+        timeZone: Asia/Hong_Kong
+        pauseWindows:
+          - { start: '09:00', end: '12:00' }
+          - { start: '14:00', end: '18:00' }
+        holidayApiUrl: 'https://timor.tech/api/holiday/year/{year}'
+        cacheTtlHours: 12
+        confirmDuringPause: true

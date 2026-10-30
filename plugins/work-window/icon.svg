@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Work window">
+  <defs>
+    <linearGradient id="wwFace" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2f6df6"/>
+      <stop offset="1" stop-color="#1b3fa8"/>
+    </linearGradient>
+  </defs>
+  <circle cx="32" cy="32" r="27" fill="url(#wwFace)"/>
+  <circle cx="32" cy="32" r="21" fill="none" stroke="#ffffff" stroke-opacity="0.55" stroke-width="2.5"/>
+  <path d="M32 15.5 L32 32 L42.5 38" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="47.5" y="8.5" width="8" height="13" rx="2.6" fill="#ffd166"/>
+  <rect x="58" y="8.5" width="4.5" height="13" rx="2.2" fill="#ffd166" transform="translate(-7.5 0)"/>
+  <circle cx="32" cy="32" r="3.4" fill="#ffffff"/>
+</svg>

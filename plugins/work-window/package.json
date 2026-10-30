@@ -1,0 +1,36 @@
+{
+  "name": "@local/dsh-work-window",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Work-window gate for DSH agents: pause agent work outside configured working windows, confirm tasks during pauses, and cache timor.tech holiday data locally.",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "cordis.patch.yml",
+    "README.md",
+    "shared/*.js",
+    "shared/*.mjs",
+    "shared/*.json",
+    "locale/*.json",
+    "icon.svg"
+  ],
+  "dsh": {
+    "bundle": { "patch": "./cordis.patch.yml" },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-sidebar",
+        "@deepseek-ai/dsh-client-ui-layout",
+        "@deepseek-ai/dsh-client-ui-conversation"
+      ]
+    }
+  }
+}

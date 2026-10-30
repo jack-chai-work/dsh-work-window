@@ -1,0 +1,746 @@
+[
+  {
+    "version": 1,
+    "year": 2026,
+    "source": "timor.tech",
+    "url": "https://timor.tech/api/holiday/year/2026",
+    "fetchedAt": "2026-10-30T10:26:40.609Z",
+    "code": 0,
+    "holidays": {
+      "01-01": {
+        "name": "元旦",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 3,
+        "date": "2026-01-01",
+        "target": null,
+        "after": null,
+        "rest": 54
+      },
+      "01-02": {
+        "name": "元旦",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 2,
+        "date": "2026-01-02",
+        "target": null,
+        "after": null,
+        "rest": 1
+      },
+      "01-03": {
+        "name": "元旦",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 2,
+        "date": "2026-01-03",
+        "target": null,
+        "after": null,
+        "rest": 1
+      },
+      "01-04": {
+        "name": "元旦后补班",
+        "type": "workday",
+        "isHoliday": false,
+        "wage": 1,
+        "date": "2026-01-04",
+        "target": "元旦",
+        "after": true,
+        "rest": 1
+      },
+      "02-14": {
+        "name": "春节前补班",
+        "type": "workday",
+        "isHoliday": false,
+        "wage": 1,
+        "date": "2026-02-14",
+        "target": "春节",
+        "after": false,
+        "rest": 34
+      },
+      "02-15": {
+        "name": "春节",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 2,
+        "date": "2026-02-15",
+        "target": null,
+        "after": null,
+        "rest": 35
+      },
+      "02-16": {
+        "name": "除夕",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 3,
+        "date": "2026-02-16",
+        "target": null,
+        "after": null,
+        "rest": 1
+      },
+      "02-17": {
+        "name": "初一",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 3,
+        "date": "2026-02-17",
+        "target": null,
+        "after": null,
+        "rest": 1
+      },
+      "02-18": {
+        "name": "初二",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 3,
+        "date": "2026-02-18",
+        "target": null,
+        "after": null,
+        "rest": 1
+      },
+      "02-19": {
+        "name": "初三",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 3,
+        "date": "2026-02-19",
+        "target": null,
+        "after": null,
+        "rest": 1
+      },
+      "02-20": {
+        "name": "初四",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 2,
+        "date": "2026-02-20",
+        "target": null,
+        "after": null,
+        "rest": 1
+      },
+      "02-21": {
+        "name": "初五",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 2,
+        "date": "2026-02-21",
+        "target": null,
+        "after": null,
+        "rest": 1
+      },
+      "02-22": {
+        "name": "初六",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 2,
+        "date": "2026-02-22",
+        "target": null,
+        "after": null,
+        "rest": 1
+      },
+      "02-23": {
+        "name": "初七",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 2,
+        "date": "2026-02-23",
+        "target": null,
+        "after": null,
+        "rest": 1
+      },
+      "02-28": {
+        "name": "春节后补班",
+        "type": "workday",
+        "isHoliday": false,
+        "wage": 1,
+        "date": "2026-02-28",
+        "target": "春节",
+        "after": true,
+        "rest": 5
+      },
+      "04-04": {
+        "name": "清明节",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 2,
+        "date": "2026-04-04",
+        "target": null,
+        "after": null,
+        "rest": 4
+      },
+      "04-05": {
+        "name": "清明节",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 3,
+        "date": "2026-04-05",
+        "target": null,
+        "after": null,
+        "rest": 1
+      },
+      "04-06": {
+        "name": "清明节",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 2,
+        "date": "2026-04-06",
+        "target": null,
+        "after": null,
+        "rest": 1
+      },
+      "05-01": {
+        "name": "劳动节",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 3,
+        "date": "2026-05-01",
+        "target": null,
+        "after": null,
+        "rest": 17
+      },
+      "05-02": {
+        "name": "劳动节",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 3,
+        "date": "2026-05-02",
+        "target": null,
+        "after": null,
+        "rest": 1
+      },
+      "05-03": {
+        "name": "劳动节",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 2,
+        "date": "2026-05-03",
+        "target": null,
+        "after": null,
+        "rest": 1
+      },
+      "05-04": {
+        "name": "劳动节",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 2,
+        "date": "2026-05-04",
+        "target": null,
+        "after": null,
+        "rest": 1
+      },
+      "05-05": {
+        "name": "劳动节",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 2,
+        "date": "2026-05-05",
+        "target": null,
+        "after": null,
+        "rest": 1
+      },
+      "05-09": {
+        "name": "劳动节后补班",
+        "type": "workday",
+        "isHoliday": false,
+        "wage": 1,
+        "date": "2026-05-09",
+        "target": "劳动节",
+        "after": true,
+        "rest": 1
+      },
+      "06-19": {
+        "name": "端午节",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 3,
+        "date": "2026-06-19",
+        "target": null,
+        "after": null,
+        "rest": 14
+      },
+      "06-20": {
+        "name": "端午节",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 2,
+        "date": "2026-06-20",
+        "target": null,
+        "after": null,
+        "rest": 1
+      },
+      "06-21": {
+        "name": "端午节",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 2,
+        "date": "2026-06-21",
+        "target": null,
+        "after": null,
+        "rest": 1
+      },
+      "09-20": {
+        "name": "中秋节前补班",
+        "type": "workday",
+        "isHoliday": false,
+        "wage": 1,
+        "date": "2026-09-20",
+        "target": "中秋节",
+        "after": false,
+        "rest": 50
+      },
+      "09-25": {
+        "name": "中秋节",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 3,
+        "date": "2026-09-25",
+        "target": null,
+        "after": null,
+        "rest": 55
+      },
+      "09-26": {
+        "name": "中秋节",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 2,
+        "date": "2026-09-26",
+        "target": null,
+        "after": null,
+        "rest": 1
+      },
+      "09-27": {
+        "name": "中秋节",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 2,
+        "date": "2026-09-27",
+        "target": null,
+        "after": null,
+        "rest": 1
+      },
+      "10-01": {
+        "name": "国庆节",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 3,
+        "date": "2026-10-01",
+        "target": null,
+        "after": null,
+        "rest": 1
+      },
+      "10-02": {
+        "name": "国庆节",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 3,
+        "date": "2026-10-02",
+        "target": null,
+        "after": null,
+        "rest": 1
+      },
+      "10-03": {
+        "name": "国庆节",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 3,
+        "date": "2026-10-03",
+        "target": null,
+        "after": null,
+        "rest": 1
+      },
+      "10-04": {
+        "name": "国庆节",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 2,
+        "date": "2026-10-04",
+        "target": null,
+        "after": null,
+        "rest": 1
+      },
+      "10-05": {
+        "name": "国庆节",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 2,
+        "date": "2026-10-05",
+        "target": null,
+        "after": null,
+        "rest": 1
+      },
+      "10-06": {
+        "name": "国庆节",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 2,
+        "date": "2026-10-06",
+        "target": null,
+        "after": null,
+        "rest": 1
+      },
+      "10-07": {
+        "name": "国庆节",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 2,
+        "date": "2026-10-07",
+        "target": null,
+        "after": null,
+        "rest": 1
+      },
+      "10-10": {
+        "name": "国庆节后补班",
+        "type": "workday",
+        "isHoliday": false,
+        "wage": 1,
+        "date": "2026-10-10",
+        "target": "国庆节",
+        "after": true,
+        "rest": null
+      }
+    },
+    "holidayCount": 33,
+    "workdayCount": 6
+  },
+  {
+    "version": 1,
+    "year": 2025,
+    "source": "timor.tech",
+    "url": "https://timor.tech/api/holiday/year/2025",
+    "fetchedAt": "2026-10-30T10:26:43.642Z",
+    "code": 0,
+    "holidays": {
+      "01-01": {
+        "name": "元旦",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 3,
+        "date": "2025-01-01",
+        "target": null,
+        "after": null,
+        "rest": 55
+      },
+      "01-26": {
+        "name": "春节前补班",
+        "type": "workday",
+        "isHoliday": false,
+        "wage": 1,
+        "date": "2025-01-26",
+        "target": "春节",
+        "after": false,
+        "rest": 19
+      },
+      "01-28": {
+        "name": "除夕",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 2,
+        "date": "2025-01-28",
+        "target": null,
+        "after": null,
+        "rest": 21
+      },
+      "01-29": {
+        "name": "初一",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 3,
+        "date": "2025-01-29",
+        "target": null,
+        "after": null,
+        "rest": 1
+      },
+      "01-30": {
+        "name": "初二",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 3,
+        "date": "2025-01-30",
+        "target": null,
+        "after": null,
+        "rest": 1
+      },
+      "01-31": {
+        "name": "初三",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 3,
+        "date": "2025-01-31",
+        "target": null,
+        "after": null,
+        "rest": 1
+      },
+      "02-01": {
+        "name": "初四",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 2,
+        "date": "2025-02-01",
+        "target": null,
+        "after": null,
+        "rest": 1
+      },
+      "02-02": {
+        "name": "初五",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 2,
+        "date": "2025-02-02",
+        "target": null,
+        "after": null,
+        "rest": 1
+      },
+      "02-03": {
+        "name": "初六",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 2,
+        "date": "2025-02-03",
+        "target": null,
+        "after": null,
+        "rest": 1
+      },
+      "02-04": {
+        "name": "初七",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 2,
+        "date": "2025-02-04",
+        "target": null,
+        "after": null,
+        "rest": null
+      },
+      "02-08": {
+        "name": "春节后补班",
+        "type": "workday",
+        "isHoliday": false,
+        "wage": 1,
+        "date": "2025-02-08",
+        "target": "春节",
+        "after": true,
+        "rest": 2
+      },
+      "04-04": {
+        "name": "清明节",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 3,
+        "date": "2025-04-04",
+        "target": null,
+        "after": null,
+        "rest": 10
+      },
+      "04-05": {
+        "name": "清明节",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 2,
+        "date": "2025-04-05",
+        "target": null,
+        "after": null,
+        "rest": 1
+      },
+      "04-06": {
+        "name": "清明节",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 2,
+        "date": "2025-04-06",
+        "target": null,
+        "after": null,
+        "rest": 1
+      },
+      "04-27": {
+        "name": "劳动节前补班",
+        "type": "workday",
+        "isHoliday": false,
+        "wage": 1,
+        "date": "2025-04-27",
+        "target": "劳动节",
+        "after": false,
+        "rest": 15
+      },
+      "05-01": {
+        "name": "劳动节",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 3,
+        "date": "2025-05-01",
+        "target": null,
+        "after": null,
+        "rest": 19
+      },
+      "05-02": {
+        "name": "劳动节",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 3,
+        "date": "2025-05-02",
+        "target": null,
+        "after": null,
+        "rest": 1
+      },
+      "05-03": {
+        "name": "劳动节",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 3,
+        "date": "2025-05-03",
+        "target": null,
+        "after": null,
+        "rest": 1
+      },
+      "05-04": {
+        "name": "劳动节",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 2,
+        "date": "2025-05-04",
+        "target": null,
+        "after": null,
+        "rest": 1
+      },
+      "05-05": {
+        "name": "劳动节",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 2,
+        "date": "2025-05-05",
+        "target": null,
+        "after": null,
+        "rest": 1
+      },
+      "05-31": {
+        "name": "端午节",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 3,
+        "date": "2025-05-31",
+        "target": null,
+        "after": null,
+        "rest": 4
+      },
+      "06-01": {
+        "name": "端午节",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 2,
+        "date": "2025-06-01",
+        "target": null,
+        "after": null,
+        "rest": 1
+      },
+      "06-02": {
+        "name": "端午节",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 2,
+        "date": "2025-06-02",
+        "target": null,
+        "after": null,
+        "rest": 1
+      },
+      "09-28": {
+        "name": "国庆节前补班",
+        "type": "workday",
+        "isHoliday": false,
+        "wage": 1,
+        "date": "2025-09-28",
+        "target": "国庆节",
+        "after": false,
+        "rest": 27
+      },
+      "10-01": {
+        "name": "国庆节",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 3,
+        "date": "2025-10-01",
+        "target": null,
+        "after": null,
+        "rest": 30
+      },
+      "10-02": {
+        "name": "国庆节",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 3,
+        "date": "2025-10-02",
+        "target": null,
+        "after": null,
+        "rest": 1
+      },
+      "10-03": {
+        "name": "国庆节",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 3,
+        "date": "2025-10-03",
+        "target": null,
+        "after": null,
+        "rest": 1
+      },
+      "10-04": {
+        "name": "国庆节",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 2,
+        "date": "2025-10-04",
+        "target": null,
+        "after": null,
+        "rest": 1
+      },
+      "10-05": {
+        "name": "国庆节",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 2,
+        "date": "2025-10-05",
+        "target": null,
+        "after": null,
+        "rest": 1
+      },
+      "10-06": {
+        "name": "中秋节",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 2,
+        "date": "2025-10-06",
+        "target": null,
+        "after": null,
+        "rest": 1
+      },
+      "10-07": {
+        "name": "国庆节",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 2,
+        "date": "2025-10-07",
+        "target": null,
+        "after": null,
+        "rest": 1
+      },
+      "10-08": {
+        "name": "国庆节",
+        "type": "holiday",
+        "isHoliday": true,
+        "wage": 2,
+        "date": "2025-10-08",
+        "target": null,
+        "after": null,
+        "rest": 1
+      },
+      "10-11": {
+        "name": "国庆节后补班",
+        "type": "workday",
+        "isHoliday": false,
+        "wage": 1,
+        "date": "2025-10-11",
+        "target": "国庆节",
+        "after": true,
+        "rest": 2
+      }
+    },
+    "holidayCount": 28,
+    "workdayCount": 5
+  }
+]

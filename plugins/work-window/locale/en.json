@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Work Window",
+    "description": "Pauses agent work outside the configured working windows, asks for confirmation when a task arrives during a pause, and caches timor.tech holiday data locally."
+  }
+}

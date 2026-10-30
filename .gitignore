@@ -1,0 +1,13 @@
+# === 本地调研产物（asar 解包，可由 tools/extract-asar.mjs 复现） ===
+.scratch/
+
+# === 依赖与构建缓存 ===
+node_modules/
+.pnpm-store/
+*.log
+
+# === 编辑器 / 系统 ===
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
