@@ -25,7 +25,7 @@
 | 5 | 用户确认通道 | 首选 `ctx.userQuestions.ask({agent, questions, signal})`（会话内问题卡片，多选项+自定义文本）；次选 `ctx.approval.request({agent, toolName, reason, displayReason, signal})`（二元 允许一次/拒绝，但文案是「工具请求越权执行」，语义偏）。两者都是 forwarded waterfall：**需要已连接的 owner Web 客户端**才能作答；无客户端时**两者都会一直挂起**（pending 直到 signal 中止 / agent 上下文释放），不会快速失败 —— 必须先 `hasLiveClient()` 守卫 + 超时（见 §2.4/§2.5）。 |
 | 6 | systemPrompt | `ctx.systemPrompt.section({name, order, text})`，`text` 可为 `(context)=>string`，`context.agent` 是本次组装的目标 agent；每个 step 都会重新 assemble，所以动态状态文案自动刷新。返回 disposer，随 fiber 清理。 |
 | 7 | Config | **不是 JSON Schema**，是 Standard Schema（`Config["~standard"].validate`）。DSH 自带包全部用 `@deepseek-ai/schemastery`（`z.object`）。配置目录/表单只认 native schemastery（否则 `Config is not a native Schemastery schema`）。 |
-| 8 | 定时器 | `ctx.timeout/interval`（`@deepseek-ai/cordis-plugin-timer`，dsh-base 已挂载）；`ctx.setTimeout` 是同义但**已废弃**的别名。都绑定到创建它的 fiber，插件卸载自动清理。 |
+| 8 | 定时器 | `ctx.timeout/interval`（`@deepseek-ai/cordis-plugin-timer`，dsh-base 已挂载）**且必须在 `inject` 声明 `'timer'`**：mixin accessor 的 getter 内部读 `ctx.timer`，漏声明的读取会抛 `cannot get property "timer" without inject`（详见 §5.3）；`ctx.setTimeout` 是同义但**已废弃**的别名。都绑定到创建它的 fiber，插件卸载自动清理。 |
 | 9 | 消息来源 | `MessageSourceMap` 中用户来源是 `kind:'user'`（含 `user-rpc`，Web 输入）；自动来源是 `kind:'goal'`、`'schedule'`、`'agent-message'`、`'team-message'`、`'subagent-settled'`、`'webhook'` 等。 |
 
 ---
@@ -616,6 +616,12 @@ export const Config = {
 
 > `ValidationError` 期望 `issues[].message` + 可选 `path`（`cordis` 940-945），所以 issue 形状要匹配。
 
+**服务依赖声明（`inject` vs `ctx.get`）**：
+
+- `export const inject = ['systemPrompt', 'timer']` 列出**硬依赖**：cordis 在运行 `apply()` 前等待它们就绪并注入本 fiber；读取未声明的服务属性会被 ctx 代理拒绝（`cannot get property "<name>" without inject`，`cordis/lib/index.js:676`）。
+- 可选服务（`approval` / `typertGateway` / `userQuestions` / `agents`）用 `ctx.get('<name>')` 读，缺失返回 `undefined`，插件自行降级。
+- 最容易漏的是 `timer`：`ctx.timeout` / `ctx.interval` 由 `cordis-plugin-timer` 用 `ctx.mixin` 暴露，getter 内部读 `ctx.timer`，所以即便 base 层已挂载 timer 也要在 `inject` 声明（详见 §5.3）。本插件曾漏声明该依赖，导致 `apply()` 抛错、插件静默失效；`tools/host.test.mjs` 现在有回归断言。
+
 ### 4.4 配置如何到达插件
 
 - `cordis.patch.yml` 的 `config:` 在激活时经 `resolveConfig` 校验后作为 `apply(ctx, config)` 第二参传入
@@ -708,7 +714,7 @@ var TimerService = class extends Service {
 ```
 
 - 该插件在 base 层**已挂载**：`ASAR/@deepseek-ai/dsh-base/cordis.patch.yml:24-25`（`id: timer` / `name: '@deepseek-ai/cordis-plugin-timer'`）。
-  所以 Host 插件可直接用，无需 inject（但稳妥起见可 `ctx.inject(['timer'], ...)`）。
+  **但 `inject` 里仍必须声明 `timer`**：已挂载只保证服务存在，不保证本插件能读。`ctx.timeout`/`ctx.interval` 是 timer 用 `ctx.mixin('timer', [...])` 注册的 accessor，其 getter 内部读的是 `ctx.timer`（`cordis/lib/index.js:676-679`）；未在 `inject` 声明时，cordis 的 ctx 代理抛 `cannot get property "timer" without inject`（本插件曾因此在 `apply()` 第一段就抛错、整行加载失败：侧栏/输入框看着正常，但系统提示词段与 `agent/pre-step` 闸门都不生效；回归断言见 `tools/host.test.mjs` §8）。agent 动态插件的沙箱 ctx 对同一约束是显式检查：`dsh-cordis-host-runner/lib/index.js:562,650`（`TIMER_VERBS` 且 `!declared.has('timer')` → deny）。
 - 语义（`cordis-plugin-timer/README.md:14-18,25-36`）：
 
 ```ts
@@ -837,7 +843,7 @@ import z from '@deepseek-ai/schemastery';
 import { evaluateWindow } from './window.js';
 
 export const name = 'work-window';
-export const inject = ['systemPrompt'];   // 强依赖；可选服务用 ctx.get()
+export const inject = ['systemPrompt', 'timer'];   // 硬依赖：systemPrompt 注册提示词段，timer 提供 ctx.timeout/ctx.interval；可选服务用 ctx.get()
 
 export const Config = z.object({
   timeZone: z.string().default('Asia/Hong_Kong'),

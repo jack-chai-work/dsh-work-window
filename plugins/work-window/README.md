@@ -80,9 +80,11 @@
 cd <plugin-dir>
 node tools/build-client.mjs      # 由 client.template.js + shared/status-client.mjs 生成 client.js
 node tools/parity.test.mjs      # 浏览器/Host 判定一致性（953 断言）
-node tools/host.test.mjs        # Host 门禁单测（32 断言，含 goal 挂起/回队/唤醒）
+node tools/host.test.mjs        # Host 门禁单测（34 断言，含 goal 挂起/回队/唤醒、inject 依赖声明）
 node tools/make-offline.mjs     # 重新生成离线节假日快照（需要网络）
 ```
+
+Host 半区依赖：`index.js` 导出的 `inject` 必须同时包含 `systemPrompt` 与 `timer`（`ctx.interval()`/`ctx.timeout()` 是 timer 服务的 mixin accessor，漏声明会让 `apply()` 抛错、插件静默失效）；可选服务（`approval`/`typertGateway`）用 `ctx.get()` 读取。
 
 ## 已知限制
 

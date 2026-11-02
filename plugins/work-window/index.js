@@ -148,8 +148,18 @@ export const Config = {
   },
 };
 
-/** systemPrompt 是硬依赖；approval / typertGateway 是可选依赖（缺失时闸门退回静默暂停）。 */
-export const inject = ['systemPrompt'];
+/**
+ * 硬依赖：`systemPrompt`（注册策略提示词段）+ `timer`。
+ *
+ * `timer` 不能省：cordis 4 里 `ctx.timeout` / `ctx.interval` 是 cordis-plugin-timer
+ * 通过 `ctx.mixin('timer', [...])` 暴露的**服务方法**，未在 `inject` 里声明 `timer`
+ * 时读取会抛 `cannot get property "timer" without inject`。本插件在 apply() 里就用
+ * `ctx.interval()` 注册节假日刷新循环，漏声明会让 apply 直接抛错、整行加载失败
+ * （表现：侧栏/输入框看起来正常，但系统提示词段与 agent/pre-step 闸门都不生效）。
+ *
+ * approval / typertGateway 是可选依赖（用 ctx.get() 读取），缺失时闸门退回静默暂停。
+ */
+export const inject = ['systemPrompt', 'timer'];
 
 /** `agent/pre-step` 监听器注册到每个 agent 自己的 ctx 上。 */
 export function apply(ctx, config) {

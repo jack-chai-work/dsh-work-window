@@ -17,7 +17,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { apply, Config } from '../index.js';
+import { apply, Config, inject } from '../index.js';
 import { serializeCache } from '../shared/holiday.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -366,6 +366,18 @@ function resetClock(iso) {
   check('config.ok.windows', ok.value.pauseWindows.length, 2);
   const bad = Config['~standard'].validate({ pauseWindows: ['25:00-26:00'], timeZone: 'Mars/Base' });
   check('config.bad.issues.length', bad.issues?.length, 2);
+}
+
+/* ------------------------------------------------------------------ *
+ * 8. 依赖声明：假 ctx 自带 interval/timeout，会掩盖真实 cordis 的 inject 要求
+ * ------------------------------------------------------------------ */
+{
+  // 回归保护：cordis 4 的 ctx.interval()/ctx.timeout() 是 timer 服务的 mixin，
+  // 未在 inject 声明 'timer' 时读取会抛
+  // `cannot get property "timer" without inject`，apply() 在注册提示词段与
+  // agent/pre-step 闸门之前就抛错 → 插件“看起来装着但不生效”。
+  check('inject.hasSystemPrompt', inject.includes('systemPrompt'), true);
+  check('inject.hasTimer', inject.includes('timer'), true);
 }
 
 globalThis.Date = RealDate;

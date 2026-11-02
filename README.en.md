@@ -131,7 +131,7 @@ node tools/check.mjs                      # build client.js + syntax checks + al
 node plugins/work-window/tools/build-client.mjs   # generate client.js from template + status-client + offline data
 node shared/holiday.test.mjs                      # holiday/window reference implementation (103 assertions)
 node plugins/work-window/tools/parity.test.mjs    # browser vs host status parity (953 assertions)
-node plugins/work-window/tools/host.test.mjs      # host gate unit tests (32 assertions)
+node plugins/work-window/tools/host.test.mjs      # host gate unit tests (34 assertions)
 node plugins/work-window/tools/client.test.mjs    # client.js load/register/render in a VM (18 assertions)
 node plugins/work-window/tools/make-offline.mjs   # regenerate the offline snapshot (needs network)
 ```
@@ -140,6 +140,7 @@ Conventions:
 
 - Change browser logic in `plugins/work-window/client.template.js` and/or `shared/status-client.mjs`, then run `node tools/build-client.mjs` (the build is deterministic, so the artifact can be committed);
 - The client artifact must not `import` any Harness client package; it only `require('react')`;
+- Host-half dependencies: `inject` must include both `systemPrompt` and `timer` (`ctx.interval`/`ctx.timeout` are timer-service mixin accessors; omitting `timer` makes `apply()` throw and the plugin silently ineffective). Optional services are read with `ctx.get()`; `host.test.mjs` covers the declaration;
 - Do not commit `.scratch/` (asar extraction, reproducible via `node tools/extract-asar.mjs`).
 
 ## Known limitations

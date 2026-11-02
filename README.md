@@ -138,7 +138,7 @@ node tools/check.mjs                      # 一键：构建 client.js + 全部�
 node plugins/work-window/tools/build-client.mjs   # 由 template + status-client + 离线数据生成 client.js
 node shared/holiday.test.mjs                      # 节假日/时段判定参考实现（103 断言）
 node plugins/work-window/tools/parity.test.mjs    # 浏览器实现 vs Host 实现逐点一致（953 断言）
-node plugins/work-window/tools/host.test.mjs      # Host 门禁单测（32 断言）
+node plugins/work-window/tools/host.test.mjs      # Host 门禁单测（34 断言）
 node plugins/work-window/tools/client.test.mjs    # client.js VM 加载/注册/渲染（18 断言）
 node plugins/work-window/tools/make-offline.mjs   # 重新生成离线节假日快照（需要网络）
 ```
@@ -147,6 +147,7 @@ node plugins/work-window/tools/make-offline.mjs   # 重新生成离线节假日�
 
 - 改浏览器逻辑 → 编辑 `plugins/work-window/client.template.js` 与/或 `shared/status-client.mjs`，然后 `node tools/build-client.mjs`（构建是确定性的，可安全提交产物）；
 - 客户端产物不能 `import` 任何 Harness 客户端包，只 `require('react')`；
+- Host 半区依赖声明：`inject` 必须包含 `systemPrompt` 与 `timer`（`ctx.interval`/`ctx.timeout` 是 timer 服务的 mixin accessor，漏声明会让 `apply()` 抛错、插件「装上了但不生效」）；可选服务用 `ctx.get()`，`host.test.mjs` 有回归断言；
 - 不要提交 `.scratch/`（asar 解包产物，可由 `node tools/extract-asar.mjs` 复现：`$env:ASAR_OUT='.scratch\asar'; node tools/extract-asar.mjs '<asar 路径>' extract 'dsh/node_modules/@deepseek-ai/<包名>'`）。
 
 ## 已知限制与未验证项
