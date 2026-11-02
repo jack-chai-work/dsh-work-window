@@ -131,7 +131,7 @@ node tools/check.mjs                      # build client.js + syntax checks + al
 node plugins/work-window/tools/build-client.mjs   # generate client.js from template + status-client + offline data
 node shared/holiday.test.mjs                      # holiday/window reference implementation (103 assertions)
 node plugins/work-window/tools/parity.test.mjs    # browser vs host status parity (953 assertions)
-node plugins/work-window/tools/host.test.mjs      # host gate unit tests (34 assertions)
+node plugins/work-window/tools/host.test.mjs      # host gate unit tests (37 assertions)
 node plugins/work-window/tools/client.test.mjs    # client.js load/register/render in a VM (18 assertions)
 node plugins/work-window/tools/make-offline.mjs   # regenerate the offline snapshot (needs network)
 ```
@@ -151,6 +151,7 @@ Conventions:
 - Without a live web client no confirmation prompt is shown; the task is queued instead (avoids a permanently pending approval).
 - GUI interaction is not automatically simulated: injecting a user message during a pause and clicking the approval dialog, plus panel theming, need manual verification. See [docs/VERIFICATION.md](docs/VERIFICATION.md).
 - Pausing relies on the public `agent/pre-step` extension point; re-verify against [docs/host-api.md](docs/host-api.md) after DSH upgrades.
+- **The wake notice must be a complete message**: on resume the plugin injects one user message via `agent.steer()` (with `id`/`role`/`content`). A message written by an older build without `role` stays in the session history, so every later request in that session fails with `INVALID_REQUEST … missing field role` (retries fail too) — start a **new session**; see [docs/host-api.md](docs/host-api.md) §1.4.
 
 ## Documentation
 

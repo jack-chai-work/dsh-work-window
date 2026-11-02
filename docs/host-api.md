@@ -187,6 +187,11 @@ inject(input)   { this.send(input, "next-step", false); }   // 不唤醒
 
 - `wakeDriver()` 只在 `phase.kind === 'idle'` 时真正起 driver（`同文件:854-869`）；另外维护任务/latch 结束时会补一次
   （`同文件:841`、`898`）。
+- **`followup`/`steer`/`inject` 的入参必须是完整消息**（`{ id, role, content, source }`，官方用 `createUserMessage()` 生成）。
+  inbox/session 都不校验：消息会原样写进 `user/message`（`dsh-session` 的 `deriveEventMessage` 直接返回 `event.data`，
+  `surface.js:85-87`），provider 序列化时读 `message.role` —— 缺 `role` 会得到
+  `INVALID_REQUEST: ... messages[n]: missing field "role"`，而且坏消息已持久化，**之后每次重试都会失败**。
+  本插件的唤醒通知踩过这个坑（2026-11-02 实测；回归断言见 `plugins/work-window/tools/host.test.mjs` §3）。
 - **没有任何 `setTimeout` 重新驱动业务逻辑的重试机制**；被 reject 的 turn 结束后 agent 就是 idle。
 - `agent.inject()` **不唤醒**（practices.md:29：“`agent.inject()` does not wake it”），适合「等待其他输入时再带上」的上下文，
   不适合「到点自动开工」。到点开工必须用插件自己的 `ctx.interval`/`ctx.timeout` + `agent.followup()`。

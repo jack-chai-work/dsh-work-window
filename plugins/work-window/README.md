@@ -80,7 +80,7 @@
 cd <plugin-dir>
 node tools/build-client.mjs      # 由 client.template.js + shared/status-client.mjs 生成 client.js
 node tools/parity.test.mjs      # 浏览器/Host 判定一致性（953 断言）
-node tools/host.test.mjs        # Host 门禁单测（34 断言，含 goal 挂起/回队/唤醒、inject 依赖声明）
+node tools/host.test.mjs        # Host 门禁单测（37 断言，含 goal 挂起/回队/唤醒、inject 依赖声明）
 node tools/make-offline.mjs     # 重新生成离线节假日快照（需要网络）
 ```
 
@@ -92,3 +92,4 @@ Host 半区依赖：`index.js` 导出的 `inject` 必须同时包含 `systemProm
 - 若插件在 agent 已运行时才热加载，会给现有 agent 补装门禁（`ctx.agents.list()`）。
 - 子 agent（subagent/teammate）同样受门禁约束；父 turn 在等待子结果期间会一并暂停。
 - 没有在线 Web 客户端时不会弹确认，任务直接排队（避免审批永久 pending）。
+- 唤醒通知是一条完整的 user 消息（`id`/`role`/`content`）；若会话历史里已有旧版本写入的缺 `role` 消息，该会话之后每次请求都会被 provider 拒绝（`INVALID_REQUEST … missing field role`），需要新建会话。

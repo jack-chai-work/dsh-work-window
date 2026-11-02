@@ -138,7 +138,7 @@ node tools/check.mjs                      # 一键：构建 client.js + 全部�
 node plugins/work-window/tools/build-client.mjs   # 由 template + status-client + 离线数据生成 client.js
 node shared/holiday.test.mjs                      # 节假日/时段判定参考实现（103 断言）
 node plugins/work-window/tools/parity.test.mjs    # 浏览器实现 vs Host 实现逐点一致（953 断言）
-node plugins/work-window/tools/host.test.mjs      # Host 门禁单测（34 断言）
+node plugins/work-window/tools/host.test.mjs      # Host 门禁单测（37 断言）
 node plugins/work-window/tools/client.test.mjs    # client.js VM 加载/注册/渲染（18 断言）
 node plugins/work-window/tools/make-offline.mjs   # 重新生成离线节假日快照（需要网络）
 ```
@@ -158,6 +158,7 @@ node plugins/work-window/tools/make-offline.mjs   # 重新生成离线节假日�
 - **无在线 Web 客户端**时不弹确认，任务直接排队（避免审批永久 pending）。
 - **GUI 交互未自动模拟**：暂停时段注入用户消息并点击审批、以及面板明暗主题/视觉，需要人工确认；单测与安装证据见 [docs/VERIFICATION.md](docs/VERIFICATION.md)。
 - 本插件通过 `agent/pre-step` 强制暂停，属于 Harness 公开扩展点；DSH 升级后若事件/服务签名变化需按 [docs/host-api.md](docs/host-api.md) 重新核对。
+- **唤醒通知必须是完整 message**：暂停→恢复时用 `agent.steer()` 注入一条 user 消息（含 `id`/`role`/`content`）。旧版本写入的缺 `role` 消息会留在会话历史里，使该会话之后每次请求都报 `INVALID_REQUEST … missing field role`（重试无效）——遇到时请**新建会话**；见 [docs/host-api.md](docs/host-api.md) §1.4。
 
 ## 文档索引
 

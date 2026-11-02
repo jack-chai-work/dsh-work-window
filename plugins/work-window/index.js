@@ -21,6 +21,8 @@
  *   - 所有注册都用 `ctx.effect` / `ctx.on` 并返回清理；
  *   - 不写 session 事件、不改日志格式；审批审计由 `ctx.approval` 自己写 log-only 事件。
  */
+import { randomUUID } from 'node:crypto';
+
 import {
   DEFAULT_PAUSE_WINDOWS,
   DEFAULT_TIME_ZONE,
@@ -250,6 +252,22 @@ export function apply(ctx, config) {
     typeof message.source === 'object' &&
     message.source.kind === 'goal';
 
+  /**
+   * 构造一条**完整**的 user 消息（等价于官方 `createUserMessage()` 的产物）。
+   *
+   * `agent.steer()`/`followup()` 只把对象塞进 inbox，不校验形状；随后 session 会把消息原样
+   * 写入 `user/message` 事件（`dsh-session` 的 `deriveEventMessage` 直接返回 `event.data`），
+   * provider 序列化请求时读 `message.role`。缺 `role` 时请求体里就是一条没有 role 的消息，
+   * DeepSeek 返回 `INVALID_REQUEST: messages[n]: missing field "role"`，且该坏消息会留在会话
+   * 历史里，之后每次重试都失败。所以唤醒通知必须补齐 `id`/`role`/`content`/`source`。
+   */
+  const createNoticeMessage = (text) => ({
+    id: randomUUID(),
+    role: 'user',
+    content: [{ type: 'text', text }],
+    source: { kind: 'work-window' },
+  });
+
   /** 把已 claim 的消息放回 inbox，等下一个可工作时刻继续。 */
   const holdMessages = (agent, messages) => {
     const restorable = messages.filter(isRestorableMessage);
@@ -293,10 +311,7 @@ export function apply(ctx, config) {
       const inbox = agent.inbox;
       if (inbox === undefined || inbox.hasPending !== true) return;
       try {
-        agent.steer({
-          content: [{ type: 'text', text: cfg.wakeNotice }],
-          source: { kind: 'work-window' },
-        });
+        agent.steer(createNoticeMessage(cfg.wakeNotice));
         ctx.logger?.info?.(`work-window: 时段恢复，已唤醒 agent ${agent.id} 继续处理暂停期间排队的任务`);
       } catch (error) {
         ctx.logger?.warn?.(`work-window: 唤醒 agent ${agent.id} 失败: ${error?.message ?? error}`);

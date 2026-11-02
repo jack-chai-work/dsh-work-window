@@ -42,13 +42,15 @@ node tools/check.mjs
 # 或分别运行
 node shared/holiday.test.mjs                                   # 103 passed：节假日/时段判定参考实现
 node plugins/work-window/tools/parity.test.mjs                 # 953 passed：浏览器实现与 Host 实现逐点一致
-node plugins/work-window/tools/host.test.mjs                   #  34 passed：Host 门禁
+node plugins/work-window/tools/host.test.mjs                   #  37 passed：Host 门禁
 node plugins/work-window/tools/client.test.mjs                 #  18 passed：client.js 在 VM 中加载/注册/渲染
 ```
 
 Host 门禁单测覆盖：可工作时段放行、暂停时段审批允许/拒绝/超时、定时任务静默回队、goal 轮次挂起后时段结束自动继续、无在线客户端时不弹审批。
 
 其中包含一条**加载期回归断言**：`index.js` 的 `inject` 必须同时声明 `systemPrompt` 与 `timer`。单测里的假 ctx 自带 `interval`/`timeout`，会掩盖真实 cordis 的 inject 要求；漏声明 `timer` 时 `apply()` 会在注册提示词段与门禁之前抛 `cannot get property "timer" without inject`，表现为「插件看着装上了但不生效」。
+
+另覆盖**唤醒消息形状**：暂停恢复时 `agent.steer()` 必须是完整 message（`id`/`role`/`content`）。缺 `role` 的消息会被 session 原样持久化进历史，provider 返回 `INVALID_REQUEST: messages[n]: missing field "role"`，且之后每次重试都失败（2026-11-02 实际触发过，需新建会话绕过）。
 
 ## 4. 用户可见验证清单
 

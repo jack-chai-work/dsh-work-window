@@ -287,6 +287,11 @@ function resetClock(iso) {
   await advanceTo(timer.due + 10);
   check('reject.wakeSteer', agent.steers.length, 1);
   check('reject.wakeSource', agent.steers[0]?.source?.kind, 'work-window');
+  // 回归保护：唤醒消息会被 session 原样持久化并序列化进 provider 请求，缺 role 会导致
+  // `INVALID_REQUEST: messages[n]: missing field "role"`（且坏消息留在历史里，重试也失败）。
+  check('reject.wakeRole', agent.steers[0]?.role, 'user');
+  check('reject.wakeId', typeof agent.steers[0]?.id, 'string');
+  check('reject.wakeContent', agent.steers[0]?.content?.[0]?.type, 'text');
 }
 
 /* ------------------------------------------------------------------ *
